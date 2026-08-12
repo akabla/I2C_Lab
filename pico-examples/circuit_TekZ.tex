@@ -1,0 +1,66 @@
+\documentclass[border=10pt]{standalone}
+\usepackage[utf8]{inputenc}
+\usepackage[siunitx]{circuitikz}
+
+\begin{document}
+
+\begin{circuitikz}[european, scale=1.2, transform shape]
+    % --- Power & Bus Rails ---
+    \draw (0, 6.5) -- (12, 6.5) node[right, font=\bfseries] {3.3V};
+    \draw (0, 5.0) -- (12, 5.0) node[right, font=\bfseries] {SDA};
+    \draw (0, 0.0) -- (12, 0.0) node[right, font=\bfseries] {GND};
+
+    % --- Branch 1: Q1 & LED (SDA Status Indicator) ---
+    % Wire from 3.3V jumping over SDA rail down to R_LED and LED
+    \draw (2, 6.5) node[circ] {} -- (2, 5.25)
+          arc (90:-90:0.25) % Wire jump over SDA rail
+          -- (2, 4.75)
+          to[R, l_=$R_{\text{LED}}$] (2, 3.5)
+          to[led, l_=\textsf{LED}] (2, 2.2);
+
+    % Q1 NMOS Transistor (Elevated to y=1.4 for S/G clearance)
+    \node[nmos, xscale=-1] (Q1) at (2, 1.4) {};
+    \node[left=14pt] at (Q1.center) {$Q_1$};
+    \node[left, font=\small] at (Q1.D) {D};
+    \node[left, font=\small] at (Q1.S) {S};
+    \node[below=2pt, font=\small] at (Q1.G) {G};
+
+    % Q1 Connections
+    \draw (2, 2.2) -- (Q1.D);
+    \draw (Q1.S) -- (2, 0) node[circ] {};
+    \draw (Q1.G) -- (3.2, 1.4) |- (3.2, 5.0) node[circ] {};
+
+    % --- Branch 2: Pull-Up Resistor R_UP ---
+    \draw (6.5, 6.5) node[circ] {} to[R, l=$R_{\text{UP}}$] (6.5, 5.0) node[circ] {};
+
+    % --- Branch 3: Pushbutton & R1 Network ---
+    % Wire from 3.3V jumping over SDA rail down to R1
+    \draw (4.5, 6.5) node[circ] {} -- (4.5, 5.25)
+          arc (90:-90:0.25) % Wire jump over SDA rail
+          -- (4.5, 4.75)
+          to[R, l_=$R_1$] (4.5, 2.8)
+          -- (4.8, 2.8)
+          to[nopb] (6.0, 2.8);
+
+    % Line after pushbutton connecting to RC & Gate
+    \draw (6.0, 2.8) -- (9.2, 2.8);
+
+    % --- RC Delay Network (C and R2) ---
+    \draw (7.0, 2.8) node[circ] {} to[C, l_=$C$] (7.0, 0) node[circ] {};
+    \draw (8.2, 2.8) node[circ] {} to[R, l_=$R_2$] (8.2, 0) node[circ] {};
+
+    % --- Branch 4: Q2 NMOS Driver ---
+    \node[nmos] (Q2) at (10.2, 1.4) {};
+    \node[right=8pt] at (Q2.center) {$Q_2$};
+    \node[right, font=\small] at (Q2.D) {D};
+    \node[right, font=\small] at (Q2.S) {S};
+    \node[below=2pt, font=\small] at (Q2.G) {G};
+
+    % Q2 Connections
+    \draw (Q2.G) -- (9.2, 1.4) -- (9.2, 2.8) node[circ] {};
+    \draw (Q2.D) -- (10.2, 5.0) node[circ] {};
+    \draw (Q2.S) -- (10.2, 0) node[circ] {};
+
+\end{circuitikz}
+
+\end{document}
